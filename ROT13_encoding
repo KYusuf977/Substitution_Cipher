@@ -1,0 +1,167 @@
+import java.util.Scanner;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+
+public class SubstitutionRot13 {
+
+	private static final String UPPERCASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	private static final String LOWERCASE = "abcdefghijklmnopqrstuvwxyz";
+
+	public static String shift(String input, int shift) {
+		StringBuilder shifted = new StringBuilder();
+		for (int i = 0; i < input.length(); i++) {
+			if (Character.isLetter(input.charAt(i))) {
+				if (Character.isUpperCase(input.charAt(i))) {
+					boolean done = false;
+					int idx = 0;
+					while (!done) {
+						if (input.charAt(i) == UPPERCASE.charAt(idx)) {
+							done = true;
+						} else {
+							idx++;
+						}
+					}
+					idx += shift;
+					if (idx > 25) {
+						idx -= 26;
+					} else if (idx < 0) {
+						idx += 26;
+					}
+					shifted.insert(i, UPPERCASE.charAt(idx));
+				} else if (Character.isLowerCase(input.charAt(i))) {
+					boolean done = false;
+					int idx = 0;
+					while (!done) {
+						if (input.charAt(i) == LOWERCASE.charAt(idx)) {
+							done = true;
+						} else {
+							idx++;
+						}
+					}
+					idx += shift;
+					if (idx > 25) {
+						idx -= 26;
+					} else if (idx < 0) {
+						idx += 26;
+					}
+					shifted.insert(i, LOWERCASE.charAt(idx));
+
+				}
+			} else {
+				shifted.insert(i, input.charAt(i));
+			}
+		}
+		String endShift = shifted.toString();
+
+		return endShift;
+	}
+
+	public static String promptForString(Scanner in, String promptMsg) {
+		boolean done = false;
+		String output = "";
+		while (!done) {
+			System.out.print(promptMsg);
+			output = in.nextLine();
+			if (output.isEmpty()) {
+				System.out.println("ERROR! Empty Input Not Allowed!");
+			}
+		}
+		return output;
+	}
+
+	/**
+	 * Opens the file inFile for reading and the file outFile for writing, reading
+	 * one line at a time from inFile, shifting it the number of characters given by
+	 * "shift" and writing that line to outFile. If an exception occurs, must report
+	 * the error message: "ERROR! File inFile not found or cannot write to outFile"
+	 * where "inFile" and "outFile" are the filenames given as parameters.
+	 *
+	 * @param inFile  the file to be transformed
+	 * @param outFile the file to write the transformed output to
+	 * @param shift   the amount to shift the characters from inFile by
+	 * @return false if an exception occurs and the error message is written,
+	 *         otherwise true
+	 */
+	public static boolean transformFile(String inFile, String outFile, int shift) {
+		boolean check = false;
+		try {
+			File textFile = new File(inFile);
+			PrintWriter textWriter = new PrintWriter(outFile);
+			Scanner textScanner = new Scanner(textFile);
+			while (textScanner.hasNext()) {
+				String transformString = textScanner.nextLine();
+				textWriter.println(shift(transformString, shift));
+			}
+			check = true;
+			textWriter.close();
+			textScanner.close();
+		} catch (FileNotFoundException e) {
+			System.out.println("Error - File " + inFile + " not found!");
+		}
+		return check;
+	}
+
+	/**
+	 * Prompts the user to enter a single character choice. The only allowable
+	 * values are 'E', 'D' or 'Q'. All other values are invalid, including all
+	 * values longer than one character in length, however the user is allowed to
+	 * enter values in either lower or upper case. If the user enters an invalid
+	 * value, the method displays the error message "ERROR! Enter a valid value!"
+	 * and then prompts the user repeatedly until a valid value is entered. Returns
+	 * a single uppercase character representing the user's choice.
+	 *
+	 * @param in Scanner to read user choices from
+	 * @return the user's choice as an uppercase character
+	 */
+	public static char getChoice(Scanner in) {
+		boolean done = false;
+		char ch = 'a';
+		while (!done) {
+			System.out.print("Enter your choice: ");
+			ch = in.next().charAt(0);
+			if (ch == 'E' || ch == 'D' || ch == 'Q') {
+				done = true;
+			} else if(ch == 'e' || ch == 'd' || ch == 'q') {
+				Character.toUpperCase(ch);
+			}
+		}
+
+		return ch;
+	}
+
+	/**
+	 * Displays the menu of choices to the user.
+	 */
+	public static void displayMenu() {
+		System.out.println("[E]ncode a file");
+		System.out.println("[D]ecode a file");
+		System.out.println("[Q]uit");
+	}
+
+	public static void main(String[] args) {
+		Scanner in = new Scanner(System.in);
+		boolean done = false;
+		while (!done) {
+			displayMenu();
+			char choice = getChoice(in);
+			if (choice == 'Q') {
+				done = true;
+			}
+			String inputPrompt = "Enter an input file: ";
+			String input = promptForString(in, inputPrompt);
+			String outputPrompt = "Enter an output file: ";
+			String output = promptForString(in, outputPrompt);
+			String shiftPrompt = "Enter a shift amount: ";
+			int shift = Integer.parseInt(promptForString(in, shiftPrompt));
+			
+			transformFile(input, output, shift);
+		}
+		System.out.println("Goodbye!");
+
+		// TODO - complete this procedure with your own implementation
+
+		in.close();
+	}
+
+}
